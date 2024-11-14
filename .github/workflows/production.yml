@@ -15,6 +15,10 @@ on:
 jobs:
   Test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v3
 
@@ -28,19 +32,24 @@ jobs:
         run: npm ci
 
       - name: Run tests with coverage
-        run: npm test -- --coverage
-
-      - name: Upload coverage reports
-        uses: actions/upload-artifact@v3
-        with:
-          name: coverage-report
-          path: coverage/
+        run: npm test -- --coverage --coverageDirectory=coverage --coverageReporters=json-summary,lcov,text
 
       - name: Jest Coverage Report
         uses: ArtiomTr/jest-coverage-report-action@v2
+        id: coverage
         with:
-          coverage-file: ./coverage/coverage-final.json
-          base-coverage-file: ./coverage/coverage-final.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          test-script: npm test -- --coverage --coverageReporters=json-summary,lcov,text
+          package-manager: npm
+          output: report-markdown
+          skip-step: all
+
+      - name: Add Coverage PR Comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event_name == 'pull_request'
+        with:
+          header: Coverage Report
+          message: ${{ steps.coverage.outputs.report }}
 
   Deploy-Production:
     needs: Test
