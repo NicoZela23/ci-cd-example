@@ -15,7 +15,7 @@ const Home: React.FC<HomeProps> = ({ recipes, loading, error }) => {
       {!loading && !error && recipes.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-6 mt-10">
           <p className="text-center text-2xl lg:text-4xl font-semibold text-rose-400">
-            Nothing to show, please search test!
+            Hola chicos desde la USFX
           </p>
           <FryingPan />
         </div>
